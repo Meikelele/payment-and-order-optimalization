@@ -6,12 +6,14 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.core.type.TypeReference;
 import java.io.File;
 import java.io.IOException;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 public class OrderAndPayOptApp
 {
-    public static void main( String[] args )
-    {
+    public static void main( String[] args ) {
         if (args.length < 2) {
             System.out.println("Please give two params: java -jar app.jar <orders.json> <paymentmethods.json>");
             System.exit(1);
@@ -22,27 +24,51 @@ public class OrderAndPayOptApp
 
         ObjectMapper mapper = new ObjectMapper();
 
+        List<PaymentMethod> paymentMethodsList = null;
+        List<Order> ordersList = null;
         try {
-            List<Order> ordersList = mapper.readValue(
+            ordersList = mapper.readValue(
                     new File(ordersFilePath),
-                    new TypeReference<List<Order>>() {}
+                    new TypeReference<List<Order>>() {
+                    }
             );
-            List<PaymentMethod> paymentMethodsList = mapper.readValue(
+            paymentMethodsList = mapper.readValue(
                     new File(paymentMethodsFilePath),
-                    new TypeReference<List<PaymentMethod>>() {}
+                    new TypeReference<List<PaymentMethod>>() {
+                    }
             );
-            System.out.println("Loaded: " + paymentMethodsList.size() + " -> payments & " + ordersList.size() + " -> orders" );
-            System.out.println(ordersList);
-            System.out.println(paymentMethodsList);
-
         } catch (IOException e) {
-
             System.err.println("Error reading or parsing input files:");
             System.exit(2);
         }
 
-        //TODO: dalsza logika
 
-        System.out.println("Another Hello world!");
+        Map<String, PaymentMethod> paymentMethodsById = paymentMethodsList.stream()
+                .collect(Collectors.toMap(PaymentMethod::getId, pm -> pm));
+
+        // POINT method
+        PaymentMethod pointsMethod = paymentMethodsById.get("PUNKTY");
+        double remainingPoints = pointsMethod.getLimit();
+
+        // CARDS method
+        Map<String, Double> remainingCardsLimit = paymentMethodsList.stream()
+                        .filter(pm -> !"PUNKTY".equals(pm.getId()))
+                        .collect(Collectors.toMap(PaymentMethod::getId, pm -> pm.getLimit()));
+
+        // usage follow spend amount
+        Map<String, Double> usage = new HashMap<>();
+        usage.put("PUNKTY", 0.0);
+        for (String card : remainingCardsLimit.keySet()) {
+            usage.put(card, 0.0);
+        }
+
+
+
+
+
+
+
+
+        System.out.println("Prison Hello world!");
     }
 }
