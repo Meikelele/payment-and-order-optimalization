@@ -13,10 +13,7 @@ import com.optimization.model.Allocation;
 public class OrderAndPayOptApp
 {
     public static void main( String[] args ) {
-        if (args.length < 2) {
-            System.out.println("Please give two params: java -jar app.jar <orders.json> <paymentmethods.json>");
-            System.exit(1);
-        }
+        validateArguments(args);
 
         String ordersFilePath = args[0];
         String paymentMethodsFilePath = args[1];
@@ -176,6 +173,18 @@ public class OrderAndPayOptApp
                         .comparingDouble((Allocation a) -> a.getDiscount())
                         .thenComparingDouble(a -> -a.getCardUsage())
                 ).orElse(null);
+    }
+
+    /**
+     * Checking if 2 arguemnts (orders & paymentmethods)
+     *
+     * @param args applicationa rguments
+     * @throws IllegalArgumentException if args.length < 2
+     */
+    public static void validateArguments(String[] args) {
+        if (args.length < 2) {
+            throw new IllegalArgumentException("Please give two params: <orders.json> <paymentmethods.json>");
+        }
     }
 }
 
