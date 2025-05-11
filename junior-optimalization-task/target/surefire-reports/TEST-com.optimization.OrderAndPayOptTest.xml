@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<testsuite xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="https://maven.apache.org/surefire/maven-surefire-plugin/xsd/surefire-test-report-3.0.xsd" version="3.0" name="com.optimization.AllocationTest" time="0.002" tests="3" errors="0" skipped="0" failures="0">
+<testsuite xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="https://maven.apache.org/surefire/maven-surefire-plugin/xsd/surefire-test-report-3.0.xsd" version="3.0" name="com.optimization.OrderAndPayOptTest" time="0.027" tests="5" errors="0" skipped="0" failures="0">
   <properties>
     <property name="java.specification.version" value="17"/>
     <property name="sun.jnu.encoding" value="UTF-8"/>
@@ -55,7 +55,9 @@
     <property name="socksNonProxyHosts" value="local|*.local|169.254/16|*.169.254/16"/>
     <property name="java.class.version" value="61.0"/>
   </properties>
-  <testcase name="gettersShouldReturnContructorData_FullPointsPayment" classname="com.optimization.AllocationTest" time="0.001"/>
-  <testcase name="constructorShouldSetMethodIdAsCardId_FullCardPayment" classname="com.optimization.AllocationTest" time="0"/>
-  <testcase name="gettersShouldReturnConstructorData_PartialPayment" classname="com.optimization.AllocationTest" time="0"/>
+  <testcase name="optimizeOrder_noPointsAndCardLimitToPay_shouldReturnNull" classname="com.optimization.OrderAndPayOptTest" time="0.013"/>
+  <testcase name="validateArguemnts_zeroArgumentShouldThrowException" classname="com.optimization.OrderAndPayOptTest" time="0.001"/>
+  <testcase name="validateArguemnts_twoArgumentShouldNotThrowException" classname="com.optimization.OrderAndPayOptTest" time="0.001"/>
+  <testcase name="validateArguemnts_oneArgumentShouldThrowException" classname="com.optimization.OrderAndPayOptTest" time="0.001"/>
+  <testcase name="optimizeOrder_partialPointsAndAnyCardPayment" classname="com.optimization.OrderAndPayOptTest" time="0.003"/>
 </testsuite>

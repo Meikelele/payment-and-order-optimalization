@@ -89,7 +89,7 @@ public class OrderAndPayOptApp
      * @param remainingCardLimit - map with card limits
      * @return good allocation or null if order cannot be pay
      */
-    private static Allocation optimizeOrder(Order order, PaymentMethod pointsMethod, double remainingPoints, Map<String, Double> remainingCardLimit, Map<String, PaymentMethod> paymentMethodMapById) {
+    public static Allocation optimizeOrder(Order order, PaymentMethod pointsMethod, double remainingPoints, Map<String, Double> remainingCardLimit, Map<String, PaymentMethod> paymentMethodMapById) {
         double orderValue = order.getValue();
 
         // firstly considering payment full by points
