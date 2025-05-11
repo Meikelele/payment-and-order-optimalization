@@ -129,8 +129,8 @@ public class OrderAndPayOptApp
         double orderValue = order.getValue();
 
         // firstly considering payment full by points
-        double pointsUsageForFullPayment = orderValue * (1 - pointsMethod.getDiscount() / 100 );
-        double pointsDiscountFullPayment = orderValue * ( pointsMethod.getDiscount() / 100 );
+        double pointsUsageForFullPayment = orderValue * (1 - pointsMethod.getDiscount() / 100d );
+        double pointsDiscountFullPayment = orderValue * ( pointsMethod.getDiscount() / 100d );
         boolean isFullPaymentByPointsPossible = remainingPoints >= pointsUsageForFullPayment;
 
         // secondly considering payment partial by points and card
@@ -162,7 +162,7 @@ public class OrderAndPayOptApp
             for (String cardId : order.getPromotions()) {
                 double limit = remainingCardLimit.getOrDefault(cardId, 0.0);
                 if (limit >= orderValue) {
-                    double cardDiscount = orderValue * paymentMethodMapById.get(cardId).getDiscount() / 100;
+                    double cardDiscount = orderValue * paymentMethodMapById.get(cardId).getDiscount() / 100d;
 
                     if (cardDiscount > bestCardDiscount) {
                         bestCardId = cardId;
@@ -199,6 +199,7 @@ public class OrderAndPayOptApp
         if (isFullPaymentByCardPossible) {
             availablePaymentOptions.add(new Allocation(bestCardId, 0.0, bestCardUsage, bestCardDiscount));
         }
+
 
         // comparing and choosing the best option
         // prioritize the loyal points (less cardUsage)
