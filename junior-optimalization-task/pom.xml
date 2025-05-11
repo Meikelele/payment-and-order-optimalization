@@ -5,8 +5,8 @@
   <modelVersion>4.0.0</modelVersion>
 
   <groupId>com.optimization</groupId>
-  <artifactId>payment-order-optimizer</artifactId>
-  <version>1.0.0</version>
+  <artifactId>juniorPaymentAndOrderOptimize</artifactId>
+  <version>1.0.1</version>
   <name>Payment Order Optimizer</name>
   <description>CLI tool for maximizing payment discounts</description>
 
