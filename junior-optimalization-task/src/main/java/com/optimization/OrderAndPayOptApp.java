@@ -8,6 +8,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.*;
 import java.util.stream.Collectors;
+import com.optimization.model.Allocation;
 
 public class OrderAndPayOptApp
 {
@@ -68,53 +69,19 @@ public class OrderAndPayOptApp
             }
 
             // decreasing limits
-            remainingPoints = remainingPoints - availableAllocation.pointsUsage;
-            usage.put("PUNKTY", usage.get("PUNKTY") + availableAllocation.pointsUsage);
+            remainingPoints = remainingPoints - availableAllocation.getPointsUsage();
+            usage.put("PUNKTY", usage.get("PUNKTY") + availableAllocation.getPointsUsage());
 
             // null if payment by points, otherwise there is cardId
-            if (availableAllocation.cardId != null) {
-                double newLimit = remainingCardsLimit.get(availableAllocation.cardId) - availableAllocation.cardUsage;
-                remainingCardsLimit.put(availableAllocation.cardId, newLimit);
-                usage.put(availableAllocation.cardId, usage.get(availableAllocation.cardId) + availableAllocation.cardUsage);
+            if (availableAllocation.getCardId() != null) {
+                double newLimit = remainingCardsLimit.get(availableAllocation.getCardId()) - availableAllocation.getCardUsage();
+                remainingCardsLimit.put(availableAllocation.getCardId(), newLimit);
+                usage.put(availableAllocation.getCardId(), usage.get(availableAllocation.getCardId()) + availableAllocation.getCardUsage());
             }
         }
 
         // printing to console
         usage.forEach((methodId, spent) -> System.out.printf("%s %.2f%n", methodId, spent));
-    }
-
-    /**
-     * This is the class for every order,
-     * for every order there is three scenario -
-     * 1) pay loyal points
-     * 2) pay partial loyal points with card
-     * 3) only by card
-     */
-    private static class Allocation {
-        String methodId;
-        String cardId;
-        double pointsUsage;
-        double cardUsage;
-        double discount;
-
-        // constructor for full payments (card or points)
-        Allocation(String methodId, double pointsUsage, double cardUsage, double discount) {
-            this.methodId = methodId;
-            this.cardId = methodId.equals("PUNKTY") ? null : methodId;
-            this.pointsUsage = pointsUsage;
-            this.cardUsage = cardUsage;
-            this.discount = discount;
-        }
-
-        // constructor for partial payments
-        Allocation(String methodId, String cardId, double pointsUsage, double cardUsage, double discount) {
-            this.methodId = methodId;
-            this.cardId = cardId;
-            this.pointsUsage = pointsUsage;
-            this.cardUsage = cardUsage;
-            this.discount = discount;
-        }
-
     }
 
     /**
@@ -194,7 +161,7 @@ public class OrderAndPayOptApp
             availablePaymentOptions.add(new Allocation("PUNKTY", pointsUsageForFullPayment, 0.0, pointsDiscountFullPayment));
         }
         if (isPartialPaymentByPointsPossible) {
-            availablePaymentOptions.add(new Allocation("PUNKTY",cardUsedForPartialPayment, pointsUsageForPartialPayment, remainingPriceToPayAfterPartialPointsDiscount, pointsDiscountForPartialPayment));
+            availablePaymentOptions.add(new Allocation("PUNKTY", cardUsedForPartialPayment, pointsUsageForPartialPayment, remainingPriceToPayAfterPartialPointsDiscount, pointsDiscountForPartialPayment));
         }
         if (isFullPaymentByCardPossible) {
             availablePaymentOptions.add(new Allocation(bestCardId, 0.0, bestCardUsage, bestCardDiscount));
@@ -206,8 +173,8 @@ public class OrderAndPayOptApp
         return availablePaymentOptions
                 .stream()
                 .max(Comparator
-                        .comparingDouble((Allocation a) -> a.discount)
-                        .thenComparingDouble(a -> -a.cardUsage)
+                        .comparingDouble((Allocation a) -> a.getDiscount())
+                        .thenComparingDouble(a -> -a.getCardUsage())
                 ).orElse(null);
     }
 }
