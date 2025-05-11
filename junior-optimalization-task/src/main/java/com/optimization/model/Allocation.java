@@ -2,13 +2,19 @@ package com.optimization.model;
 
 import lombok.Getter;
 
-
 /**
- * This is the class for every order,
+ * This is the class for every order - represent the way of payment,
  * for every order there is three scenario -
  * 1) pay loyal points
  * 2) pay partial loyal points with card
  * 3) only by card
+ *
+ *
+ * - methodId: points or card,
+ * - cardId: cardId if partialPayment,
+ * - pointsUsage: amount of points usage,
+ * - cardUsage: amount of card usage,
+ * - discount: jsut discount.
  */
 @Getter
 public class Allocation {
