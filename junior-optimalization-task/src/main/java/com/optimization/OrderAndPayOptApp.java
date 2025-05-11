@@ -60,13 +60,27 @@ public class OrderAndPayOptApp
         }
 
 
+        // getting the best payment scenario
+        for (Order order : ordersList) {
+            Allocation availableAllocation = optimizeOrder(order, pointsMethod, remainingPoints, remainingCardsLimit, paymentMethodsById);
+            if (availableAllocation == null) {
+                continue;
+            }
 
+            // decreasing limits
+            remainingPoints = remainingPoints - availableAllocation.pointsUsage;
+            usage.put("PUNKTY", usage.get("PUNKTY") + availableAllocation.pointsUsage);
 
+            // null if payment by points, otherwise there is cardId
+            if (availableAllocation.cardId != null) {
+                double newLimit = remainingCardsLimit.get(availableAllocation.cardId) - availableAllocation.cardUsage;
+                remainingCardsLimit.put(availableAllocation.cardId, newLimit);
+                usage.put(availableAllocation.cardId, usage.get(availableAllocation.cardId) + availableAllocation.cardUsage);
+            }
+        }
 
-
-
-
-        System.out.println("Prison Hello world!");
+        // printing to console
+        usage.forEach((methodId, spent) -> System.out.printf("%s %.2f%n", methodId, spent));
     }
 
     /**
