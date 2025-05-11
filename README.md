@@ -17,7 +17,8 @@
   - [Tests](#tests)
 
 ## Project Goal
-<p>The goal of this project is to develop an algorithm that, given a list of orders, available promotions, and a customer wallet (payment methods with limits and discounts), selects the optimal way to pay for each order to maximize the total discount while fully covering all orders. The algorithm should minimize credit-card spending by preferring loyalty points when it does not reduce the applicable discount.</p>
+The goal of this project is to develop an algorithm that, given a list of orders and a customer wallet (payment methods), selects the optimal way to pay for each order.  
+The algorithm should minimize credit-card spending by preferring loyalty points.
 
 
 
