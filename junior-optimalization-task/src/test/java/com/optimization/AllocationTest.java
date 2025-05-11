@@ -6,7 +6,7 @@ import static org.junit.jupiter.api.Assertions.*;
 public class AllocationTest {
 
     @Test
-    void gettersShouldReturnContructorDataFullPointsPayment() {
+    void gettersShouldReturnContructorData_FullPointsPayment() {
         // ARRANGE
         String expectedMethodId = "PUNKTY";
         String expectedCardId = null;
@@ -32,7 +32,7 @@ public class AllocationTest {
     }
 
     @Test
-    void constructorShouldSetMethodIdAsCardIdInCaseOfFullCardPayment() {
+    void constructorShouldSetMethodIdAsCardId_FullCardPayment() {
         // ARRANGE
         String expectedMethodId = "mZysk";
         double expectedPointsUsage = 0.0;
@@ -45,6 +45,26 @@ public class AllocationTest {
         // ASSERT
         assertEquals(expectedMethodId, testAllocation.getMethodId());
         assertEquals(expectedMethodId, testAllocation.getCardId());
+        assertEquals(expectedPointsUsage, testAllocation.getPointsUsage());
+        assertEquals(expectedCardUsage, testAllocation.getCardUsage());
+        assertEquals(expectedDiscount, testAllocation.getDiscount());
+    }
+
+    @Test
+    void gettersShouldReturnConstructorData_PartialPayment() {
+        // ARRANGE
+        String expectedMethodId = "PUNKTY";
+        String expectedCardId = "BosBankrut";
+        double expectedPointsUsage = 250.0;
+        double expectedCardUsage = 2250;
+        double expectedDiscount = 100;
+
+        // ACT
+        Allocation testAllocation = new Allocation(expectedMethodId, expectedCardId, expectedPointsUsage, expectedCardUsage, expectedDiscount);
+
+        // ASSERT
+        assertEquals(expectedMethodId, testAllocation.getMethodId());
+        assertEquals(expectedCardId, testAllocation.getCardId());
         assertEquals(expectedPointsUsage, testAllocation.getPointsUsage());
         assertEquals(expectedCardUsage, testAllocation.getCardUsage());
         assertEquals(expectedDiscount, testAllocation.getDiscount());
