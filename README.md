@@ -6,12 +6,20 @@
   </p>
 </div>
 
----
+
+## Schedule
+  - [Project Goal](#project-goal)
+  - [Tech Stack](#tech-stack)
+  - [Installation](#installation)
+  - [Necessary files](#necessary-files)
+  - [Requirements](#requirements)
+  - [How it works](#how-it-works)
+  - [Tests](#tests)
 
 ## Project Goal
-The goal of this project is to develop an algorithm that, given a list of orders, available promotions, and a customer wallet (payment methods with limits and discounts), selects the optimal way to pay for each order to maximize the total discount while fully covering all orders. The algorithm should minimize credit-card spending by preferring loyalty points when it does not reduce the applicable discount.
+<p>The goal of this project is to develop an algorithm that, given a list of orders, available promotions, and a customer wallet (payment methods with limits and discounts), selects the optimal way to pay for each order to maximize the total discount while fully covering all orders. The algorithm should minimize credit-card spending by preferring loyalty points when it does not reduce the applicable discount.</p>
 
----
+
 
 ## Tech Stack
 ![Java17](https://img.shields.io/badge/-Java17-ffffff?style=flat-square&logo=openjdk&logoColor=000000) 
@@ -20,7 +28,7 @@ The goal of this project is to develop an algorithm that, given a list of orders
 ![Jackson](https://img.shields.io/badge/-JacksonDatabind-FF9900?style=flat-square) 
 ![JUnit5](https://img.shields.io/badge/-JUnit5-25A162?style=flat-square&logo=junit5&logoColor=000000)
 
----
+
 
 ## Installation
 
@@ -41,7 +49,18 @@ Run a fat-jar
 java -jar target/juniorPaymentAndOrderOptimize-1.0.1.jar orders.json paymentmethods.json
 ```
 
----
+
+## Requirements
+- [ ] Pay each order by **one** of:
+  - full loyalty points  
+  - full single card  
+  - partial (≥10 % points + one card)
+- [ ] Apply **card discount** only for cards in the order’s promotions list  
+- [ ] Apply **10 % discount** if ≥10 % of the order is paid in points  
+- [ ] **Track and decrement** global points balance and each card’s limit  
+- [ ] **Maximize total discount**; on ties, prefer scenarios using more points (less card usage)  
+
+
 
 ## Necessary files
 <table>
@@ -75,21 +94,9 @@ JSON file containing the list of payment methods.
   </tr>
 </table>
 
----
 
-## Requirements
-- [ ] Pay each order by **one** of:
-  - full loyalty points  
-  - full single card  
-  - partial (≥10 % points + one card)
-- [ ] Apply **card discount** only for cards in the order’s promotions list  
-- [ ] Apply **10 % discount** if ≥10 % of the order is paid in points  
-- [ ] **Track and decrement** global points balance and each card’s limit  
-- [ ] **Maximize total discount**; on ties, prefer scenarios using more points (less card usage)  
 
----
-
-## Some Significant Issue
+## How It Works
 1. **JSON parsing** 
     - Jackson `ObjectMapper` reads `List<Order>` and `List<PaymentMethod>` from the two input files.  
 2. **Init**
@@ -107,8 +114,8 @@ Pick the option with the highest discount (tie? loyal points are prioritize)
      mZysk  165.00
      BosBankrut 190.00
      ```
+   
 
----
 
 ## Tests
 
@@ -118,6 +125,6 @@ Pick the option with the highest discount (tie? loyal points are prioritize)
 - **OrderAndPayOptAppTest** covers `optimizeOrder` scenarios:  
   - full payment with points  
   - full payment with promo card  
-  - partial points + fallback card  
+  - partial points + card  
   - tie-breaker on equal discounts  
   - no valid option → returns `null`
