@@ -6,9 +6,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.core.type.TypeReference;
 import java.io.File;
 import java.io.IOException;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 public class OrderAndPayOptApp
@@ -72,6 +70,40 @@ public class OrderAndPayOptApp
     }
 
     /**
+     * This is the class for every order,
+     * for every order there is three scenario -
+     * 1) pay loyal points
+     * 2) pay partial loyal points with card
+     * 3) only by card
+     */
+    private static class Allocation {
+        String methodId;
+        String cardId;
+        double pointsUsage;
+        double cardUsage;
+        double discount;
+
+        // constructor for full payments (card or points)
+        Allocation(String methodId, double pointsUsage, double cardUsage, double discount) {
+            this.methodId = methodId;
+            this.cardId = methodId.equals("PUNKTY") ? null : methodId;
+            this.pointsUsage = pointsUsage;
+            this.cardUsage = cardUsage;
+            this.discount = discount;
+        }
+
+        // constructor for partial payments
+        Allocation(String methodId, String cardId, double pointsUsage, double cardUsage, double discount) {
+            this.methodId = methodId;
+            this.cardId = cardId;
+            this.pointsUsage = pointsUsage;
+            this.cardUsage = cardUsage;
+            this.discount = discount;
+        }
+
+    }
+
+    /**
      *
      * @param order - the order that need to be pay
      * @param pointsMethod - "PUNKTY" object
@@ -79,7 +111,7 @@ public class OrderAndPayOptApp
      * @param remainingCardLimit - map with card limits
      * @return good allocation or null if order cannot be pay
      */
-    private static Allocation optimizeOrder(Order order, PaymentMethod pointsMethod, double remainingPoints, Map<String, Double> remainingCardLimit) {
+    private static Allocation optimizeOrder(Order order, PaymentMethod pointsMethod, double remainingPoints, Map<String, Double> remainingCardLimit, Map<String, PaymentMethod> paymentMethodMapById) {
         double orderValue = order.getValue();
 
         // firstly considering payment full by points
@@ -92,46 +124,76 @@ public class OrderAndPayOptApp
         double pointsDiscountForPartialPayment = pointsUsageForPartialPayment;
         double remainingPriceToPayAfterPartialPointsDiscount = orderValue - pointsUsageForPartialPayment;
 
-        boolean hasEnoughPointsForPartialPayment = remainingPoints >= pointsUsageForPartialPayment;
-        boolean hasPromotions = order.getPromotions() != null;
-        boolean isSomeCardCoverRemainingPrice = hasPromotions && order.getPromotions()
-                .stream()
-                .anyMatch(id -> remainingCardLimit.getOrDefault(id, 0.0) >= remainingPriceToPayAfterPartialPointsDiscount);
-        boolean isPartialPaymentByPointsPossible = !isFullPaymentByPointsPossible && hasEnoughPointsForPartialPayment && hasPromotions && isSomeCardCoverRemainingPrice;
+        boolean isPartialPaymentByPointsPossible = !isFullPaymentByPointsPossible &&
+                        remainingPoints >= pointsUsageForPartialPayment &&
+                        remainingCardLimit.values()
+                                .stream()
+                                .anyMatch(cardLimitation -> cardLimitation >= remainingPriceToPayAfterPartialPointsDiscount);
+        String cardUsedForPartialPayment = null;
+        if (isPartialPaymentByPointsPossible) {
+            for (String cardId : remainingCardLimit.keySet()) {
+                if (remainingCardLimit.get(cardId) >= remainingPriceToPayAfterPartialPointsDiscount) {
+                    cardUsedForPartialPayment = cardId;
+                    break;
+                }
+            }
+        }
 
         // thirdly considering full payment by card
         String bestCardId = null;
         double bestCardUsage = 0.0;
         double bestCardDiscount = 0.0;
-        if (hasPromotions) {
-            for
+        // looking for card that get the best promotion
+        if (order.getPromotions() != null) {
+            for (String cardId : order.getPromotions()) {
+                double limit = remainingCardLimit.getOrDefault(cardId, 0.0);
+                if (limit >= orderValue) {
+                    double cardDiscount = orderValue * paymentMethodMapById.get(cardId).getDiscount() / 100;
+
+                    if (cardDiscount > bestCardDiscount) {
+                        bestCardId = cardId;
+                        bestCardDiscount = cardDiscount;
+                        bestCardUsage = orderValue - cardDiscount;
+                    }
+                }
+            }
         }
 
+        // considering any card that have enough amount of money to cover the orderValue
+        if (bestCardId == null) {
+            for (String cardId : remainingCardLimit.keySet()) {
+                double cardLimit = remainingCardLimit.get(cardId);
 
+                if (cardLimit >= orderValue) {
+                    bestCardId = cardId;
+                    bestCardDiscount = 0.0;
+                    bestCardUsage = orderValue;
+                    break;
+                }
+            }
+        }
+        boolean isFullPaymentByCardPossible = bestCardId != null;
 
-
-    }
-
-    /**
-     * This is the class for every order,
-     * for every order there is three scenario -
-     * 1) pay loyal points
-     * 2) pay partial loyal points with card
-     * 3) only by card
-     */
-    private static class Allocation {
-        String methodId;
-        double pointsUsage;
-        double cardUsage;
-        double discount;
-
-        Allocation(String methodId, double pointsUsage, double cardUsage, double discount) {
-            this.methodId = methodId;
-            this.pointsUsage = pointsUsage;
-            this.cardUsage = cardUsage;
-            this.discount = discount;
+        // gathering the available options
+        List<Allocation> availablePaymentOptions = new ArrayList<Allocation>();
+        if (isFullPaymentByPointsPossible) {
+            availablePaymentOptions.add(new Allocation("PUNKTY", pointsUsageForFullPayment, 0.0, pointsDiscountFullPayment));
+        }
+        if (isPartialPaymentByPointsPossible) {
+            availablePaymentOptions.add(new Allocation("PUNKTY",cardUsedForPartialPayment, pointsUsageForPartialPayment, remainingPriceToPayAfterPartialPointsDiscount, pointsDiscountForPartialPayment));
+        }
+        if (isFullPaymentByCardPossible) {
+            availablePaymentOptions.add(new Allocation(bestCardId, 0.0, bestCardUsage, bestCardDiscount));
         }
 
+        // comparing and choosing the best option
+        // prioritize the loyal points (less cardUsage)
+        return availablePaymentOptions
+                .stream()
+                .max(Comparator
+                        .comparingDouble((Allocation a) -> a.discount)
+                        .thenComparingDouble(a -> -a.cardUsage)
+                ).orElse(null);
     }
 }
 
