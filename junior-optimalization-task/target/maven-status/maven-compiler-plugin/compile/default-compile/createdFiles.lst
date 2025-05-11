@@ -1,3 +1,4 @@
+com/optimization/model/Allocation.class
 com/optimization/model/Order.class
 com/optimization/OrderAndPayOptApp$2.class
 com/optimization/model/PaymentMethod.class
